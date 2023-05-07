@@ -1,8 +1,11 @@
 from __future__ import annotations
+from typing import Optional
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import select, JSON
 
 from .base import Base
 
@@ -15,6 +18,31 @@ class Package(Base):
     )
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
     title: Mapped[str] = mapped_column("title", String(length=128), nullable=True)
+    config: Mapped[JSON] = mapped_column("config", JSON())
+
+    @classmethod
+    async def one(cls, session: AsyncSession, id: int) -> Optional["Package"]:
+        stmt = select(cls).filter_by(id=id)
+        return await session.scalar(stmt)
+
+    @classmethod
+    async def one_by_name(cls, session: AsyncSession, name: str) -> Optional["Package"]:
+        stmt = select(cls).filter_by(name=name)
+        return await session.scalar(stmt)
+
+    @classmethod
+    async def create(
+        cls, session: AsyncSession, name: str, title: Optional[str] = None
+    ) -> "Package":
+        pkg = cls(name=name, title=title)
+        session.add(pkg)
+        await session.flush()
+        return pkg
+
+    async def delete(self, session: AsyncSession) -> "Package":
+        await session.delete(self)
+        await session.flush()
+        return self
 
     # @classmethod
     # async def read_all(

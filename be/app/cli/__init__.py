@@ -1,6 +1,7 @@
 import click
 
 from .db import db
+from .pkg import pkg
 
 
 @click.group()
@@ -14,3 +15,4 @@ def start() -> None:
 
 
 app.add_command(db)
+app.add_command(pkg)

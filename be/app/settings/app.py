@@ -55,6 +55,7 @@ class AppSettings(BaseSettings):
     """Default URL where static assets are located."""
     STATIC_DIR: Path = STATIC_DIR
     DEV_MODE: bool = False
+    BETTER_EXCEPTIONS: int = 1
 
     @property
     def slug(self) -> str:
