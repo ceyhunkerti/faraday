@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import select, JSON
 
 from .base import Base
@@ -30,11 +30,28 @@ class Package(Base):
         stmt = select(cls).filter_by(name=name)
         return await session.scalar(stmt)
 
+    as_source: Mapped[list[Extraction]] = relationship(
+        "Extraction",
+        back_populates="source_package",
+        order_by="Extraction.id",
+        cascade="save-update, merge, refresh-expire, expunge, delete, delete-orphan",
+    )
+    as_target: Mapped[list[Extraction]] = relationship(
+        "Extraction",
+        back_populates="target_package",
+        order_by="Extraction.id",
+        cascade="save-update, merge, refresh-expire, expunge, delete, delete-orphan",
+    )
+
     @classmethod
     async def create(
-        cls, session: AsyncSession, name: str, title: Optional[str] = None
+        cls,
+        session: AsyncSession,
+        name: str,
+        title: Optional[str] = None,
+        config: Optional[dict] = None,
     ) -> "Package":
-        pkg = cls(name=name, title=title)
+        pkg = cls(name=name, title=title, config=config)
         session.add(pkg)
         await session.flush()
         return pkg
@@ -93,10 +110,14 @@ class Package(Base):
     #     await session.flush()
 
 
+from .ext import Extraction  # noqa: E402
+
+
 class PackageSchema(BaseModel):
     id: int
-    title: str
     name: str
+    title: Optional[str]
+    config: Optional[dict]
 
     class Config:
         orm_mode = True
