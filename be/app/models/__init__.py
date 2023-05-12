@@ -1,6 +1,6 @@
 from .base import Base
 from .package import Package
-from .ext import Extraction
+from .extraction import Extraction
 
 __all__ = [
     "Base",

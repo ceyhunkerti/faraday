@@ -1,12 +1,12 @@
 from pydantic import BaseSettings, SecretBytes, validator
 from pathlib import Path
 from typing import Final
-from app import utils
+from app import util
 import binascii
 import os
 
 DEFAULT_MODULE_NAME = "app"
-BASE_DIR: Final = utils.module_to_os_path(DEFAULT_MODULE_NAME)
+BASE_DIR: Final = util.module_to_os_path(DEFAULT_MODULE_NAME)
 STATIC_DIR = Path(BASE_DIR / "domain" / "web" / "public")
 
 

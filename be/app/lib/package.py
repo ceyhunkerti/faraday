@@ -43,8 +43,8 @@ def uninstall(name_or_url: str) -> None:
 
 async def add(
     name_or_url: str,
-    title: Optional[str] = None,
-    config: Optional[dict] = None,
+    title: Optional[str],
+    config: Optional[dict],
 ) -> Optional[models.Package]:
     async with get_async_session() as session:
         if await models.Package.one_by_name(session, name_or_url):
@@ -53,7 +53,7 @@ async def add(
         else:
             install(name_or_url)
             logger.debug("registering package ...")
-            pkg = await models.Package.create(
+            package = await models.Package.create(
                 session=session,
                 name=name_or_url,
                 title=title,
@@ -61,17 +61,17 @@ async def add(
             )
             await session.commit()
             logger.info(f"{name_or_url} installed")
-            return pkg
+            return package
 
 
 async def remove(name_or_url: str) -> Optional[models.Package]:
     async with get_async_session() as session:
-        if not (pkg := await models.Package.one_by_name(session, name_or_url)):
+        if not (package := await models.Package.one_by_name(session, name_or_url)):
             logger.warning(f"{name_or_url} nor installed")
             return None
         else:
             uninstall(name_or_url)
             logger.debug("un-registering package ...")
-            await pkg.delete(session=session)
+            await package.delete(session=session)
             await session.commit()
-            return pkg
+            return package

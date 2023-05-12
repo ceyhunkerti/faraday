@@ -1,5 +1,5 @@
 from typing import Final
-from app import utils
+from app import util
 from app.settings.api import APISettings
 from app.settings.app import AppSettings
 from app.settings.db import DatabaseSettings
@@ -15,7 +15,7 @@ from app.settings.worker import WorkerSettings
 from pydantic import ValidationError
 
 DEFAULT_MODULE_NAME = "app"
-BASE_DIR: Final = utils.module_to_os_path(DEFAULT_MODULE_NAME)
+BASE_DIR: Final = util.module_to_os_path(DEFAULT_MODULE_NAME)
 
 
 @lru_cache
