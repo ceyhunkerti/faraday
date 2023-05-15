@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Generator
 import pytest
 import app.settings as settings
@@ -7,7 +6,7 @@ from sqlalchemy import text, event
 from sqlalchemy.exc import SQLAlchemyError
 from app import models
 from sqlalchemy.orm import Session, SessionTransaction
-from unittest.mock import patch
+
 from sqlalchemy import create_engine
 import pytest_asyncio
 
@@ -77,15 +76,6 @@ async def session() -> AsyncGenerator:
                 if conn.sync_connection:
                     conn.sync_connection.begin_nested()
 
-        @asynccontextmanager
-        async def test_get_session() -> AsyncGenerator:
-            try:
-                async with AsyncSessionLocal() as session:
-                    yield session
-            except SQLAlchemyError:
-                pass
-
-        with patch("app.lib.package.get_async_session", test_get_session):
-            yield async_session
-            await async_session.close()
-            await conn.rollback()
+        yield async_session
+        await async_session.close()
+        await conn.rollback()

@@ -2,9 +2,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.lib import package as lib
 from app import models
+from unittest.mock import patch
+from tests.utils import get_async_session
 
 
 @pytest.mark.asyncio
+@patch("app.lib.package.get_async_session", get_async_session)
 async def test_add_success(session: AsyncSession) -> None:
     packages = [
         {
