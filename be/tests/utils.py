@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from app import settings
 from contextlib import asynccontextmanager
@@ -9,6 +10,7 @@ async_engine = create_async_engine(
     f"{settings.db.URL.rsplit('/app', 1)[0] + '/test'}",
     pool_pre_ping=True,
     echo=settings.db.ECHO,
+    poolclass=NullPool,
 )
 async_session_maker = async_sessionmaker(
     bind=async_engine,

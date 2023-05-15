@@ -71,7 +71,7 @@ async def add(
 async def remove(name_or_url: str) -> Optional[models.Package]:
     async with get_async_session() as session:
         if not (package := await models.Package.one_by_name(session, name_or_url)):
-            logger.warning(f"{name_or_url} nor installed")
+            logger.warning(f"{name_or_url} not installed")
             return None
         else:
             uninstall(name_or_url)

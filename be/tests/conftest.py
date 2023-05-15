@@ -1,14 +1,16 @@
 from typing import AsyncGenerator, Generator
 import pytest
 import app.settings as settings
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy import text, event
+from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from app import models
-from sqlalchemy.orm import Session, SessionTransaction
-
+from tests.utils import get_async_session
 from sqlalchemy import create_engine
+
 import pytest_asyncio
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -22,7 +24,7 @@ def setup_db() -> Generator:
         conn.execute(text("commit"))
         conn.execute(text("drop database test with (force)"))
     except SQLAlchemyError as e:
-        print(e)
+        logger.info(e)
     finally:
         conn.execute(text("commit"))
         conn.close()
@@ -38,44 +40,19 @@ def setup_db() -> Generator:
 
     yield
 
+    engine = create_engine(url)
     conn = engine.connect()
     try:
         conn.execute(text("commit"))
         conn.execute(text("drop database test with (force)"))
-    except SQLAlchemyError:
-        ...
+    except SQLAlchemyError as e:
+        logger.error(e)
     finally:
         conn.execute(text("commit"))
         conn.close()
 
 
-# @pytest.fixture
 @pytest_asyncio.fixture
 async def session() -> AsyncGenerator:
-    # https://github.com/sqlalchemy/sqlalchemy/issues/5811#issuecomment-756269881
-    async_engine = create_async_engine(
-        f"{settings.db.URL.rsplit('/app', 1)[0] + '/test'}"
-    )
-    async with async_engine.connect() as conn:
-        await conn.begin()
-        await conn.begin_nested()
-        AsyncSessionLocal = async_sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=conn,
-            future=True,
-        )
-
-        async_session = AsyncSessionLocal()
-
-        @event.listens_for(async_session.sync_session, "after_transaction_end")
-        def end_savepoint(session: Session, transaction: SessionTransaction) -> None:
-            if conn.closed:
-                return
-            if not conn.in_nested_transaction():
-                if conn.sync_connection:
-                    conn.sync_connection.begin_nested()
-
-        yield async_session
-        await async_session.close()
-        await conn.rollback()
+    async with get_async_session() as session:
+        yield session
