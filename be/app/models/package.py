@@ -4,8 +4,9 @@ from typing import AsyncIterator, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import select, JSON
+
 
 from .base import Base
 
@@ -19,6 +20,17 @@ class Package(Base):
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
     title: Mapped[str] = mapped_column("title", String(length=128), nullable=True)
     config: Mapped[JSON] = mapped_column("config", JSON())
+
+    as_source = relationship(
+        "Extraction",
+        foreign_keys="[Extraction.source_package_id]",
+        back_populates="source_package",
+    )
+    as_target = relationship(
+        "Extraction",
+        foreign_keys="[Extraction.target_package_id]",
+        back_populates="target_package",
+    )
 
     @classmethod
     async def one(cls, session: AsyncSession, id: int) -> Optional["Package"]:

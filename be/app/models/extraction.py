@@ -24,18 +24,16 @@ class Extraction(Base):
     source_package_id: Mapped[int] = mapped_column(
         "source_package_id", ForeignKey("packages.id"), nullable=False
     )
-
     source_package: Mapped[Package] = relationship(
-        "Package", back_populates="as_source"
+        "Package", back_populates="as_source", foreign_keys=[source_package_id]
     )
     source_config: Mapped[JSON] = mapped_column("source_config", JSON(), nullable=True)
 
     target_package_id: Mapped[int] = mapped_column(
         "target_package_id", ForeignKey("packages.id"), nullable=False
     )
-
     target_package: Mapped[Package] = relationship(
-        "Package", back_populates="as_target"
+        "Package", back_populates="as_target", foreign_keys=[target_package_id]
     )
     target_config: Mapped[JSON] = mapped_column("target_config", JSON(), nullable=True)
 

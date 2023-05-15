@@ -39,17 +39,13 @@
         "--rcfile=pylintrc"
     ],
     "python.linting.enabled": true,
-    "python.testing.pytestArgs": [
-        "tests/unit",
-        "tests/integration"
-    ],
-    "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.envFile": "${workspaceFolder}/.env",
+    "python.envFile": "${workspaceFolder}/be/.env",
     "python.formatting.provider": "black",
     "python.analysis.extraPaths": [
-        "${workspaceFolder}/src"
+        "${workspaceFolder}/be"
     ],
+    "python.analysis.autoSearchPaths": true,
     "[python]": {
         "editor.formatOnPaste": false,
         "editor.formatOnSave": true,
@@ -75,6 +71,10 @@
     },
     "python.linting.lintOnSave": true,
     "python.linting.mypyEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}/be/tests",
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/be",
+    },
     "mypy.runUsingActiveInterpreter": true,
     "mypy.targets": [
         "be"

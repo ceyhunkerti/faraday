@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from app import models
-from app.db.base import get_async_session
+from app.db import get_async_session
 
 logger = logging.getLogger(__name__)
 

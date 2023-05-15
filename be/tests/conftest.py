@@ -1,47 +1,62 @@
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Generator
 import pytest
-from app import settings
+import app.settings as settings
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy import text, event
 from sqlalchemy.exc import SQLAlchemyError
 from app import models
 from sqlalchemy.orm import Session, SessionTransaction
-from app.db import get_async_session
-from app.main import app
 from unittest.mock import patch
+from sqlalchemy import create_engine
+import pytest_asyncio
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def setup_db() -> AsyncGenerator:
-    engine = create_async_engine(settings.db.URL)
-    async_session_maker = async_sessionmaker(bind=engine)
+def setup_db() -> Generator:
+    url = settings.db.URL.replace("+asyncpg", "")
 
-    async with async_session_maker() as session:
-        try:
-            await session.execute(text("drop database test"))
-        except SQLAlchemyError:
-            ...
-        finally:
-            await session.commit()
+    engine = create_engine(url)
+    conn = engine.connect()
 
-        await session.execute(text("create database test"))
-        await session.run_sync(models.Base.metadata.create_all)
+    try:
+        conn.execute(text("commit"))
+        conn.execute(text("drop database test with (force)"))
+    except SQLAlchemyError as e:
+        print(e)
+    finally:
+        conn.execute(text("commit"))
+        conn.close()
+
+    conn = engine.connect()
+    conn.execute(text("commit"))
+    conn.execute(text("create database test"))
+    conn.execute(text("grant all privileges on database test to app"))
+    conn.close()
+
+    engine = create_engine(url.rsplit("/app", 1)[0] + "/test")
+    models.Base.metadata.create_all(engine)
 
     yield
 
-    async with async_session_maker() as session:
-        try:
-            await session.execute(text("drop database test"))
-        except SQLAlchemyError:
-            ...
-        finally:
-            await session.commit()
+    conn = engine.connect()
+    try:
+        conn.execute(text("commit"))
+        conn.execute(text("drop database test with (force)"))
+    except SQLAlchemyError:
+        ...
+    finally:
+        conn.execute(text("commit"))
+        conn.close()
 
 
-@pytest.fixture
+# @pytest.fixture
+@pytest_asyncio.fixture
 async def session() -> AsyncGenerator:
     # https://github.com/sqlalchemy/sqlalchemy/issues/5811#issuecomment-756269881
-    async_engine = create_async_engine(f"{settings.db.URL}/test")
+    async_engine = create_async_engine(
+        f"{settings.db.URL.rsplit('/app', 1)[0] + '/test'}"
+    )
     async with async_engine.connect() as conn:
         await conn.begin()
         await conn.begin_nested()
@@ -62,15 +77,15 @@ async def session() -> AsyncGenerator:
                 if conn.sync_connection:
                     conn.sync_connection.begin_nested()
 
-        def test_get_session() -> Generator:
+        @asynccontextmanager
+        async def test_get_session() -> AsyncGenerator:
             try:
-                yield AsyncSessionLocal
+                async with AsyncSessionLocal() as session:
+                    yield session
             except SQLAlchemyError:
                 pass
 
-        app.dependency_overrides[get_async_session] = test_get_session
-
-        with patch("app.db.base.get_async_session", test_get_session):
+        with patch("app.lib.package.get_async_session", test_get_session):
             yield async_session
             await async_session.close()
             await conn.rollback()

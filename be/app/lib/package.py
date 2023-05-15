@@ -1,6 +1,6 @@
 from typing import Optional
 from app import models
-from app.db.base import get_async_session
+from app.db import get_async_session
 import subprocess
 import logging
 
@@ -16,7 +16,11 @@ def install(name_or_url: str) -> None:
         )
     except subprocess.CalledProcessError as e:
         output = e.output
-    if b"ERROR" in output:
+    if (
+        b"ERROR" in output
+        and b"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed."  # noqa
+        not in output
+    ):
         logger.exception(output)
         logger.error(f"An error occurred while installing {name_or_url}")
         raise Exception("Package install error")
