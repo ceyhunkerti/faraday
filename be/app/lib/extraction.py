@@ -3,6 +3,7 @@ from typing import Optional
 
 from app import models
 from app.db import get_async_session
+from app.exceptions import PackageNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -10,9 +11,9 @@ logger = logging.getLogger(__name__)
 async def add(
     name: str,
     source_package: str,
-    source_config: Optional[dict],
     target_package: str,
-    target_config: Optional[dict],
+    source_config: Optional[dict] = None,
+    target_config: Optional[dict] = None,
 ) -> Optional[models.Extraction]:
     async with get_async_session() as session:
         if await models.Extraction.one_by_name(session, name=name):
@@ -24,14 +25,14 @@ async def add(
         )
         if not source_package_model:
             logger.error(f"{source_package} not found in packages!")
-            raise Exception("package not found!")
+            raise PackageNotFoundError(source_package)
 
         target_package_model = await models.Package.one_by_name(
             session=session, name=target_package
         )
         if not target_package_model:
             logger.error(f"{target_package} not found in packages!")
-            raise Exception("package not found!")
+            raise PackageNotFoundError(target_package)
 
         extraction = await models.Extraction.create(
             session=session,

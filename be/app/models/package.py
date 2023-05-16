@@ -25,11 +25,13 @@ class Package(Base):
         "Extraction",
         foreign_keys="[Extraction.source_package_id]",
         back_populates="source_package",
+        cascade="delete, delete-orphan",
     )
     as_target = relationship(
         "Extraction",
         foreign_keys="[Extraction.target_package_id]",
         back_populates="target_package",
+        cascade="delete, delete-orphan",
     )
 
     @classmethod

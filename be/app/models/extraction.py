@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel
 from sqlalchemy import JSON, ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
 
 from .base import Base
 
@@ -25,7 +25,9 @@ class Extraction(Base):
         "source_package_id", ForeignKey("packages.id"), nullable=False
     )
     source_package: Mapped[Package] = relationship(
-        "Package", back_populates="as_source", foreign_keys=[source_package_id]
+        "Package",
+        back_populates="as_source",
+        foreign_keys=[source_package_id],
     )
     source_config: Mapped[JSON] = mapped_column("source_config", JSON(), nullable=True)
 
@@ -41,7 +43,12 @@ class Extraction(Base):
     async def one_by_name(
         cls, session: AsyncSession, name: str
     ) -> Optional["Extraction"]:
-        stmt = select(cls).filter_by(name=name)
+        stmt = (
+            select(cls)
+            .filter_by(name=name)
+            .options(selectinload(Extraction.source_package))
+            .options(selectinload(Extraction.target_package))
+        )
         return await session.scalar(stmt)
 
     @classmethod

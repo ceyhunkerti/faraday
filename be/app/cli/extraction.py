@@ -27,8 +27,8 @@ async def add(
     await lib.add(
         name=name,
         source_package=source_package,
-        source_config=util.json_config(source_config),
         target_package=target_package,
+        source_config=util.json_config(source_config),
         target_config=util.json_config(target_config),
     )
 
