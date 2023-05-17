@@ -8,6 +8,7 @@ import os
 DEFAULT_MODULE_NAME = "app"
 BASE_DIR: Final = util.module_to_os_path(DEFAULT_MODULE_NAME)
 STATIC_DIR = Path(BASE_DIR / "domain" / "web" / "public")
+VENV_HOME = ".venv"
 
 
 class AppSettings(BaseSettings):
@@ -21,6 +22,8 @@ class AppSettings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+
+    VENV_HOME: str = VENV_HOME
 
     BUILD_NUMBER: str = ""
     """Identifier for CI build."""

@@ -29,8 +29,9 @@ def add_packages() -> None:
 
 
 @patch("app.lib.extraction.get_session", get_session)
-def test_add(session: Session) -> None:
-    add_packages()
+def test_add(session: Session, pip_bin: str) -> None:
+    with patch("app.lib.package.pip_bin", pip_bin):
+        add_packages()
 
     lib.add(
         name="ext-1",
@@ -48,8 +49,9 @@ def test_add(session: Session) -> None:
 
 
 @patch("app.lib.extraction.get_session", get_session)
-def test_remove(session: Session) -> None:
-    add_packages()
+def test_remove(session: Session, pip_bin: str) -> None:
+    with patch("app.lib.package.pip_bin", pip_bin):
+        add_packages()
 
     lib.add(
         name="ext-1",
@@ -64,13 +66,17 @@ def test_remove(session: Session) -> None:
 
 @patch("app.lib.extraction.get_session", get_session)
 @patch("app.lib.package.get_session", get_session)
-def test_run() -> None:
+def test_run(venv_bin: str, pip_bin: str) -> None:
     tap = "tap-csv"
     target = "target-csv"
 
     with NamedTemporaryFile(mode="w", suffix=".csv") as s1, NamedTemporaryFile(
         mode="w", suffix=".csv"
-    ) as s2, TemporaryDirectory() as td:
+    ) as s2, TemporaryDirectory() as td, patch(
+        "app.lib.package.pip_bin", pip_bin
+    ), patch(
+        "app.lib.extraction.venv_bin", venv_bin
+    ):
 
         def get_text(content):
             text = [content["columns"]] + content["data"]

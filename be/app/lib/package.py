@@ -3,6 +3,10 @@ from app import models
 from app.db import get_session
 import subprocess
 import logging
+from app import settings
+import os
+
+pip_bin = os.path.join(settings.app.VENV_HOME, "bin/pip")
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +15,7 @@ def install(name: str) -> None:
     try:
         logger.info(f"installing package {name} ...")
         output = subprocess.check_output(
-            [".venv/bin/pip", "install", name],
+            [pip_bin, "install", name],
             stderr=subprocess.STDOUT,
         )
     except subprocess.CalledProcessError as e:

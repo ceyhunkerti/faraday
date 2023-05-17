@@ -7,7 +7,10 @@ from app.exceptions import PackageNotFoundError, ExtractionNotFoundError
 from tempfile import NamedTemporaryFile
 import json
 import subprocess
+from app import settings
+import os
 
+venv_bin: str = os.path.join(settings.app.VENV_HOME, "bin")
 logger = logging.getLogger(__name__)
 
 
@@ -95,8 +98,8 @@ def run(
             target_config_file.write(config_text)
             target_config_file.flush()
 
-            source_bin = f".venv/bin/{source_package.name}"
-            target_bin = f".venv/bin/{target_package.name}"
+            source_bin = os.path.join(venv_bin, source_package.name)
+            target_bin = os.path.join(venv_bin, target_package.name)
 
             scf = f"--config {source_config_file.name}"
             tcf = f"--config {target_config_file.name}"

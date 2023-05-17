@@ -6,10 +6,32 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import models
 from tests.utils import get_session
 from sqlalchemy import create_engine
-
+from tempfile import TemporaryDirectory
 from logging import getLogger
+import subprocess
+import os
 
 logger = getLogger(__name__)
+
+
+@pytest.fixture(scope="session", autouse=False)
+def venv() -> Generator:
+    with TemporaryDirectory(suffix="venv") as tmpdir:
+        venv = os.path.join(tmpdir, ".venv")
+        subprocess.run(["python3.10", "-m", "venv", venv], check=True)
+        yield venv
+
+
+@pytest.fixture(scope="session", autouse=False)
+def pip_bin(venv: str) -> Generator:
+    bin = os.path.join(venv, "bin/pip")
+    yield bin
+
+
+@pytest.fixture(scope="session", autouse=False)
+def venv_bin(venv: str) -> Generator:
+    bin = os.path.join(venv, "bin")
+    yield bin
 
 
 @pytest.fixture(scope="session", autouse=True)

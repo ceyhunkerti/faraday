@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 
 @patch("app.lib.package.get_session", get_session)
-def test_add(session: Session) -> None:
+def test_add(session: Session, pip_bin: str) -> None:
     packages = [
         {
             "name": "target-gsheet",
@@ -19,9 +19,9 @@ def test_add(session: Session) -> None:
             "config": {"a": "b"},
         },
     ]
-
-    for package in packages:
-        lib.add(**package)  # type: ignore
+    with patch("app.lib.package.pip_bin", pip_bin):
+        for package in packages:
+            lib.add(**package)  # type: ignore
 
     for pe in packages:
         pg = models.Package.one_by_name(session=session, name=pe["name"])  # type: ignore
@@ -32,7 +32,7 @@ def test_add(session: Session) -> None:
 
 
 @patch("app.lib.package.get_session", get_session)
-def test_remove(session: Session) -> None:
+def test_remove(session: Session, pip_bin: str) -> None:
     packages = [
         {
             "name": "target-gsheet",
@@ -45,12 +45,12 @@ def test_remove(session: Session) -> None:
             "config": {"a": "b"},
         },
     ]
+    with patch("app.lib.package.pip_bin", pip_bin):
+        for package in packages:
+            lib.add(**package)  # type: ignore
 
-    for package in packages:
-        lib.add(**package)  # type: ignore
-
-    for package in packages:
-        lib.remove(name=package["name"])  # type: ignore
+        for package in packages:
+            lib.remove(name=package["name"])  # type: ignore
 
     for pe in packages:
         pg = models.Package.one_by_name(session=session, name=pe["name"])  # type: ignore
