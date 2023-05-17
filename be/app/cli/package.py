@@ -12,17 +12,26 @@ def package():
 
 @package.command()
 @coro
-@click.argument("name_or_url", required=True)
+@click.argument("name", required=True)
 @click.argument("title", required=False, type=str)
 @click.option("--default-config", required=False, type=str)
+@click.option("--url", required=False, type=str)
 async def add(
-    name_or_url: str, title: Optional[str] = None, default_config: Optional[str] = None
+    name: str,
+    title: Optional[str] = None,
+    default_config: Optional[str] = None,
+    url: Optional[str] = None,
 ) -> None:
-    await lib.add(name_or_url, title=title, config=util.json_config(default_config))
+    await lib.add(
+        name,
+        title=title,
+        config=util.json_config(default_config),
+        url=url,
+    )
 
 
 @package.command()
 @coro
-@click.argument("name_or_url", required=True)
-async def remove(name_or_url: str) -> None:
-    await lib.remove(name_or_url)
+@click.argument("name", required=True)
+async def remove(name: str) -> None:
+    await lib.remove(name)

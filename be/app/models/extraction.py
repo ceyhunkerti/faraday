@@ -39,6 +39,8 @@ class Extraction(Base):
     )
     target_config: Mapped[JSON] = mapped_column("target_config", JSON(), nullable=True)
 
+    state: Mapped[JSON] = mapped_column("state", JSON(), nullable=True)
+
     @classmethod
     async def one_by_name(
         cls, session: AsyncSession, name: str

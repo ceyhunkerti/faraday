@@ -20,6 +20,7 @@ class Package(Base):
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
     title: Mapped[str] = mapped_column("title", String(length=128), nullable=True)
     config: Mapped[JSON] = mapped_column("config", JSON())
+    url: Mapped[str] = mapped_column("url", String(length=512), nullable=True)
 
     as_source = relationship(
         "Extraction",
@@ -58,8 +59,9 @@ class Package(Base):
         name: str,
         title: Optional[str] = None,
         config: Optional[dict] = None,
+        url: Optional[str] = None,
     ) -> "Package":
-        package = cls(name=name, title=title, config=config)
+        package = cls(name=name, title=title, config=config, url=url)
         session.add(package)
         await session.flush()
         return package

@@ -3,7 +3,10 @@ from typing import Optional
 
 from app import models
 from app.db import get_async_session
-from app.exceptions import PackageNotFoundError
+from app.exceptions import PackageNotFoundError, ExtractionNotFoundError
+from tempfile import NamedTemporaryFile
+import json
+import subprocess
 
 logger = logging.getLogger(__name__)
 
@@ -55,3 +58,48 @@ async def remove(name: str) -> Optional[models.Extraction]:
             await extraction.delete(session=session)
             await session.commit()
             return extraction
+
+
+async def run(
+    name: str,
+    source_config: Optional[dict] = None,
+    target_config: Optional[dict] = None,
+) -> None:
+    async with get_async_session() as session:
+        if not (extraction := await models.Extraction.one_by_name(session, name=name)):
+            raise ExtractionNotFoundError(name)
+        source_package = extraction.source_package
+        target_package = extraction.target_package
+
+        s_config = (
+            source_config or extraction.source_config or source_package.config or {}  # type: ignore
+        )
+        t_config = (
+            target_config or extraction.target_config or target_package.config or {}  # type: ignore
+        )
+
+        with NamedTemporaryFile(
+            mode="w", suffix=".json"
+        ) as source_config_file, NamedTemporaryFile(
+            mode="w", suffix=".json"
+        ) as target_config_file, NamedTemporaryFile(
+            mode="w", suffix=".json"
+        ) as state_file:
+            source_config_file.write(json.dumps(s_config))
+            target_config_file.write(json.dumps(t_config))
+
+            source_bin = f".venv/bin/{source_package.name}"
+            target_bin = f".venv/bin/{target_package.name}"
+
+            scf = f"--config {source_config_file.name}"
+            tcf = f"--config {target_config_file.name}"
+
+            command = f"{source_bin} {scf} | {target_bin} {tcf} > {state_file.name}"
+
+            try:
+                logger.info(command)
+                _ = subprocess.run(command, shell=True, check=True)
+                logger.info("Command executed successfully!")
+            except subprocess.CalledProcessError as e:
+                logger.error("Command execution failed.")
+                raise e

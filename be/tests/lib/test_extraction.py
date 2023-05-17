@@ -60,3 +60,48 @@ async def test_remove(session: AsyncSession) -> None:
 
     extraction = await models.Extraction.one_by_name(session=session, name="ext-1")  # type: ignore
     assert extraction is None, "Extraction %s is not removed" % "ext-1"
+
+
+@pytest.mark.asyncio
+@patch("app.lib.extraction.get_async_session", get_async_session)
+@patch("app.lib.package.get_async_session", get_async_session)
+async def test_run() -> None:
+    tap = "tap-csv"
+    target = "target-csv"
+    leads = {
+        "columns": ["a", "b"],
+        "data": [
+            [1, "xyz"],
+            [2, "klm"],
+        ],
+    }
+    opportunities = {
+        "columns": ["x", "y"],
+        "data": [
+            [10, "XYZ"],
+            [20, "KLM"],
+        ],
+    }
+
+    tap_config = {
+        "files": [
+            {
+                "entity": "leads",
+                "file": "%s",
+                "keys": leads["columns"],
+            },
+            {
+                "entity": "opportunities",
+                "file": "%s",
+                "keys": opportunities["columns"],
+            },
+        ]
+    }
+
+    target_config = {
+        "delimiter": "\t",
+        "quotechar": "'",
+        "destination_path": "%s",
+    }
+
+    await libp
