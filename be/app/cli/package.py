@@ -1,7 +1,6 @@
 from typing import Optional
 import click
 from app.lib import package as lib
-from .coro import coro
 from app import util
 
 
@@ -11,18 +10,17 @@ def package():
 
 
 @package.command()
-@coro
 @click.argument("name", required=True)
 @click.argument("title", required=False, type=str)
 @click.option("--default-config", required=False, type=str)
 @click.option("--url", required=False, type=str)
-async def add(
+def add(
     name: str,
     title: Optional[str] = None,
     default_config: Optional[str] = None,
     url: Optional[str] = None,
 ) -> None:
-    await lib.add(
+    lib.add(
         name,
         title=title,
         config=util.json_config(default_config),
@@ -31,7 +29,6 @@ async def add(
 
 
 @package.command()
-@coro
 @click.argument("name", required=True)
-async def remove(name: str) -> None:
-    await lib.remove(name)
+def remove(name: str) -> None:
+    lib.remove(name)

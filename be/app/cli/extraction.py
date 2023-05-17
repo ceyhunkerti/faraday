@@ -1,6 +1,5 @@
 from typing import Optional
 import click
-from .coro import coro
 from app.lib import extraction as lib
 from app import util
 
@@ -11,20 +10,19 @@ def extraction():
 
 
 @extraction.command()
-@coro
 @click.argument("name")
 @click.argument("source")
 @click.option("-s", "--source-config", required=False)
 @click.argument("target")
 @click.option("-t", "--target-config", required=False)
-async def add(
+def add(
     name: str,
     source_package: str,
     source_config: Optional[str],
     target_package: str,
     target_config: Optional[str],
 ) -> None:
-    await lib.add(
+    lib.add(
         name=name,
         source_package=source_package,
         target_package=target_package,
@@ -34,7 +32,6 @@ async def add(
 
 
 @extraction.command()
-@coro
 @click.argument("name")
-async def remove(name: str) -> None:
-    await lib.remove(name=name)
+def remove(name: str) -> None:
+    lib.remove(name=name)

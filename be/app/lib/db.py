@@ -1,4 +1,3 @@
-from sqlalchemy.ext.asyncio import AsyncConnection
 import logging
 from app import models
 import sqlalchemy as sa
@@ -15,12 +14,12 @@ def is_db_empty(conn):
     return len(get_table_names(conn)) == 0
 
 
-async def init(conn: AsyncConnection):
-    if await conn.run_sync(is_db_empty):
-        await conn.run_sync(models.Base.metadata.create_all)
+def init(conn: sa.Connection):
+    if is_db_empty(conn):
+        models.Base.metadata.create_all(conn.engine)
     else:
         logger.warn("database is not empty!")
 
 
-async def drop(conn: AsyncConnection) -> None:
-    await conn.run_sync(models.Base.metadata.drop_all)
+def drop(conn: sa.Connection) -> None:
+    models.Base.metadata.drop_all(conn.engine)

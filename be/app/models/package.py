@@ -1,10 +1,9 @@
 from __future__ import annotations
-from typing import AsyncIterator, Optional
+from typing import Iterator, Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy import select, JSON
 
 
@@ -36,26 +35,25 @@ class Package(Base):
     )
 
     @classmethod
-    async def one(cls, session: AsyncSession, id: int) -> Optional["Package"]:
+    def one(cls, session: Session, id: int) -> Optional["Package"]:
         stmt = select(cls).filter_by(id=id)
-        return await session.scalar(stmt)
+        return session.scalar(stmt)
 
     @classmethod
-    async def one_by_name(cls, session: AsyncSession, name: str) -> Optional["Package"]:
+    def one_by_name(cls, session: Session, name: str) -> Optional["Package"]:
         stmt = select(cls).filter_by(name=name)
-        return await session.scalar(stmt)
+        return session.scalar(stmt)
 
     @classmethod
-    async def all(cls, session: AsyncSession, name: str) -> AsyncIterator["Package"]:
+    def all(cls, session: Session, name: str) -> Iterator["Package"]:
         stmt = select(cls)
-        stream = await session.stream_scalars(stmt.order_by(cls.name))
-        async for row in stream:
+        for row in session.scalars(stmt.order_by(cls.name)):
             yield row
 
     @classmethod
-    async def create(
+    def create(
         cls,
-        session: AsyncSession,
+        session: Session,
         name: str,
         title: Optional[str] = None,
         config: Optional[dict] = None,
@@ -63,12 +61,12 @@ class Package(Base):
     ) -> "Package":
         package = cls(name=name, title=title, config=config, url=url)
         session.add(package)
-        await session.flush()
+        session.flush()
         return package
 
-    async def delete(self, session: AsyncSession) -> "Package":
-        await session.delete(self)
-        await session.flush()
+    def delete(self, session: Session) -> "Package":
+        session.delete(self)
+        session.flush()
         return self
 
 

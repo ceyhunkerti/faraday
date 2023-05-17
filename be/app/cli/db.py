@@ -1,8 +1,7 @@
 import click
 from app.lib.db import init as init_db, drop as drop_db
 
-from .coro import coro
-from app.db.base import async_engine
+from app.db import engine
 
 
 @click.group()
@@ -11,16 +10,14 @@ def db():
 
 
 @db.command()
-@coro
-async def init() -> None:
-    async with async_engine.connect() as conn:
-        await init_db(conn)
-        await conn.commit()
+def init() -> None:
+    with engine.connect() as conn:
+        init_db(conn)
+        conn.commit()
 
 
 @db.command()
-@coro
-async def drop() -> None:
-    async with async_engine.connect() as conn:
-        await drop_db(conn)
-        await conn.commit()
+def drop() -> None:
+    with engine.connect() as conn:
+        drop_db(conn)
+        conn.commit()

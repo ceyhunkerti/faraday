@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import JSON, ForeignKey, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, Session
 
 from .base import Base
 
@@ -42,21 +41,19 @@ class Extraction(Base):
     state: Mapped[JSON] = mapped_column("state", JSON(), nullable=True)
 
     @classmethod
-    async def one_by_name(
-        cls, session: AsyncSession, name: str
-    ) -> Optional["Extraction"]:
+    def one_by_name(cls, session: Session, name: str) -> Optional["Extraction"]:
         stmt = (
             select(cls)
             .filter_by(name=name)
             .options(selectinload(Extraction.source_package))
             .options(selectinload(Extraction.target_package))
         )
-        return await session.scalar(stmt)
+        return session.scalar(stmt)
 
     @classmethod
-    async def create(
+    def create(
         cls,
-        session: AsyncSession,
+        session: Session,
         name: str,
         source_package_id: int,
         source_config: Optional[dict],
@@ -71,12 +68,12 @@ class Extraction(Base):
             target_config=target_config,
         )
         session.add(extraction)
-        await session.flush()
+        session.flush()
         return extraction
 
-    async def delete(self, session: AsyncSession) -> "Extraction":
-        await session.delete(self)
-        await session.flush()
+    def delete(self, session: Session) -> "Extraction":
+        session.delete(self)
+        session.flush()
         return self
 
 

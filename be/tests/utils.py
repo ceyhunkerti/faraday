@@ -1,25 +1,25 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app import settings
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from contextlib import contextmanager
+from typing import Generator
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-
-async_engine = create_async_engine(
+engine = create_engine(
     f"{settings.db.URL.rsplit('/app', 1)[0] + '/test'}",
     pool_pre_ping=True,
     echo=settings.db.ECHO,
     poolclass=NullPool,
 )
-async_session_maker = async_sessionmaker(
-    bind=async_engine,
+session_maker = sessionmaker(
+    bind=engine,
     autoflush=False,
     future=True,
 )
 
 
-@asynccontextmanager
-async def get_async_session() -> AsyncGenerator:
-    async with async_session_maker() as session:
+@contextmanager
+def get_session() -> Generator:
+    with session_maker() as session:
         yield session

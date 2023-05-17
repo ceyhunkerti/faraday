@@ -1,13 +1,12 @@
-from typing import AsyncGenerator, Generator
+from typing import Generator
 import pytest
 import app.settings as settings
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from app import models
-from tests.utils import get_async_session
+from tests.utils import get_session
 from sqlalchemy import create_engine
 
-import pytest_asyncio
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -15,7 +14,7 @@ logger = getLogger(__name__)
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_db() -> Generator:
-    url = settings.db.URL.replace("+asyncpg", "")
+    url = settings.db.URL
 
     engine = create_engine(url)
     conn = engine.connect()
@@ -52,7 +51,7 @@ def setup_db() -> Generator:
         conn.close()
 
 
-@pytest_asyncio.fixture
-async def session() -> AsyncGenerator:
-    async with get_async_session() as session:
+@pytest.fixture
+def session() -> Generator:
+    with get_session() as session:
         yield session

@@ -1,3 +1,3 @@
-from .base import get_async_session
+from .base import get_session, engine
 
-__all__ = ["get_async_session"]
+__all__ = ["get_session", "engine"]

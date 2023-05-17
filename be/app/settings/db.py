@@ -35,7 +35,7 @@ class DatabaseSettings(BaseSettings):
     CONNECT_ARGS: dict[str, Any] = {}
     URL: PostgresDsn = parse_obj_as(
         PostgresDsn,
-        "postgresql+asyncpg://app:app@localhost:15432/app",
+        "postgresql://app:app@localhost:15432/app",
     )
 
     DB_ENGINE: str | None = None

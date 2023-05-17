@@ -1,6 +1,6 @@
 from typing import Optional
 from app import models
-from app.db import get_async_session
+from app.db import get_session
 import subprocess
 import logging
 
@@ -45,36 +45,39 @@ def uninstall(name: str) -> None:
         logger.info(f"{name} was uninstalled successfully")
 
 
-async def add(
-    name: str, title: Optional[str], config: Optional[dict], url: Optional[str] = None
+def add(
+    name: str,
+    title: Optional[str] = None,
+    config: Optional[dict] = None,
+    url: Optional[str] = None,
 ) -> Optional[models.Package]:
-    async with get_async_session() as session:
-        if await models.Package.one_by_name(session, name):
+    with get_session() as session:
+        if models.Package.one_by_name(session, name):
             logger.warning(f"{name} already exists!")
             return None
         else:
-            install(name)
+            install(url if url else name)
             logger.debug("registering package ...")
-            package = await models.Package.create(
+            package = models.Package.create(
                 session=session,
                 name=name,
                 title=title,
                 config=config,
                 url=url,
             )
-            await session.commit()
+            session.commit()
             logger.info(f"{name} installed")
             return package
 
 
-async def remove(name: str) -> Optional[models.Package]:
-    async with get_async_session() as session:
-        if not (package := await models.Package.one_by_name(session, name)):
+def remove(name: str) -> Optional[models.Package]:
+    with get_session() as session:
+        if not (package := models.Package.one_by_name(session, name)):
             logger.warning(f"{name} not installed")
             return None
         else:
             uninstall(name)
             logger.debug("un-registering package ...")
-            await package.delete(session=session)
-            await session.commit()
+            package.delete(session=session)
+            session.commit()
             return package
