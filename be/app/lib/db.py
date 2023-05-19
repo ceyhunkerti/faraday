@@ -1,25 +1,25 @@
 import logging
-from app import models
+from app.models import db
 import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 
 
-def get_table_names(conn):
-    inspector = sa.inspect(conn)
-    return inspector.get_table_names()
+def get_table_names():
+    return sa.inspect(db.get_engine()).get_table_names()
 
 
-def is_db_empty(conn):
-    return len(get_table_names(conn)) == 0
+def is_db_empty():
+    return len(get_table_names()) == 0
 
 
-def init(conn: sa.Connection):
-    if is_db_empty(conn):
-        models.Base.metadata.create_all(conn.engine)
+def init():
+    if is_db_empty():
+        sa.orm.configure_mappers()
+        db.create_all()
     else:
         logger.warn("database is not empty!")
 
 
-def drop(conn: sa.Connection) -> None:
-    models.Base.metadata.drop_all(conn.engine)
+def drop() -> None:
+    db.drop_all()

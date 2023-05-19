@@ -1,59 +1,47 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
-
+from typing import Optional
 from pydantic import BaseModel
-from sqlalchemy import JSON, ForeignKey, select
-from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, Session
-
-from .base import Base
-
-if TYPE_CHECKING:
-    from .package import Package
+from sqlalchemy import JSON, ForeignKey
+from .base import Base, db
 
 
 class Extraction(Base):
     __tablename__ = "extractions"
 
-    id: Mapped[int] = mapped_column(
-        "id", autoincrement=True, nullable=False, unique=True, primary_key=True
+    id = db.Column(
+        db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True
     )
-    name: Mapped[str] = mapped_column(nullable=False, unique=True)
+    name = db.Column(db.String, nullable=False, unique=True)
 
-    source_package_id: Mapped[int] = mapped_column(
-        "source_package_id", ForeignKey("packages.id"), nullable=False
-    )
-    source_package: Mapped[Package] = relationship(
+    source_package_id = db.Column(db.Integer, ForeignKey("packages.id"), nullable=False)
+    source_package = db.relationship(
         "Package",
         back_populates="as_source",
         foreign_keys=[source_package_id],
     )
-    source_config: Mapped[JSON] = mapped_column("source_config", JSON(), nullable=True)
+    source_config = db.Column(JSON, nullable=True)
 
-    target_package_id: Mapped[int] = mapped_column(
-        "target_package_id", ForeignKey("packages.id"), nullable=False
-    )
-    target_package: Mapped[Package] = relationship(
+    target_package_id = db.Column(db.Integer, ForeignKey("packages.id"), nullable=False)
+    target_package = db.relationship(
         "Package", back_populates="as_target", foreign_keys=[target_package_id]
     )
-    target_config: Mapped[JSON] = mapped_column("target_config", JSON(), nullable=True)
+    target_config = db.Column(JSON, nullable=True)
 
-    state: Mapped[JSON] = mapped_column("state", JSON(), nullable=True)
+    state = db.Column(JSON, nullable=True)
 
     @classmethod
-    def one_by_name(cls, session: Session, name: str) -> Optional["Extraction"]:
-        stmt = (
-            select(cls)
-            .filter_by(name=name)
-            .options(selectinload(Extraction.source_package))
-            .options(selectinload(Extraction.target_package))
+    def one_by_name(cls, name: str) -> Optional["Extraction"]:
+        return (
+            cls.query.filter_by(name=name)
+            .options(db.selectinload(cls.source_package))
+            .options(db.selectinload(cls.target_package))
+            .one_or_none()
         )
-        return session.scalar(stmt)
 
     @classmethod
     def create(
         cls,
-        session: Session,
         name: str,
         source_package_id: int,
         source_config: Optional[dict],
@@ -67,13 +55,19 @@ class Extraction(Base):
             target_package_id=target_package_id,
             target_config=target_config,
         )
-        session.add(extraction)
-        session.flush()
+        db.session.add(extraction)
+        db.session.flush()
         return extraction
 
-    def delete(self, session: Session) -> "Extraction":
-        session.delete(self)
-        session.flush()
+    def delete(self) -> "Extraction":
+        db.session.delete(self)
+        db.session.flush()
+        return self
+
+    def update_state(self, state: Optional[dict] = None) -> "Extraction":
+        self.state = state or {}
+        db.session.commit()
+        db.session.flush()
         return self
 
 

@@ -1,15 +1,15 @@
 from sqlalchemy.pool import NullPool
 
-from app import settings
+from app.settings import settings
 from contextlib import contextmanager
 from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 engine = create_engine(
-    f"{settings.db.URL.rsplit('/app', 1)[0] + '/test'}",
+    f"{settings.SQLALCHEMY_DATABASE_URI.rsplit('/app', 1)[0] + '/test'}",
     pool_pre_ping=True,
-    echo=settings.db.ECHO,
+    echo=True,
     poolclass=NullPool,
 )
 session_maker = sessionmaker(

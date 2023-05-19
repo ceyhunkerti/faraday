@@ -1,15 +1,12 @@
-from sqlalchemy.orm import Session
 from app.lib import package as libp
 from app.lib import extraction as lib
 from app import models
 from unittest.mock import patch
-from tests.utils import get_session
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import os
 import glob
 
 
-@patch("app.lib.package.get_session", get_session)
 def add_packages() -> None:
     packages = [
         {
@@ -28,8 +25,7 @@ def add_packages() -> None:
         libp.add(**package)  # type: ignore
 
 
-@patch("app.lib.extraction.get_session", get_session)
-def test_add(session: Session, pip_bin: str) -> None:
+def test_add(pip_bin: str) -> None:
     with patch("app.lib.package.pip_bin", pip_bin):
         add_packages()
 
@@ -38,7 +34,7 @@ def test_add(session: Session, pip_bin: str) -> None:
         source_package="tap-bing-ads",
         target_package="target-gsheet",
     )
-    extraction = models.Extraction.one_by_name(session=session, name="ext-1")  # type: ignore
+    extraction = models.Extraction.one_by_name(name="ext-1")  # type: ignore
     assert extraction is not None, "Extraction %s not found" % "ext-1"
     assert extraction.source_package.name == "tap-bing-ads", (
         "source package %s not found" % "tap-bing-ads"
@@ -48,8 +44,7 @@ def test_add(session: Session, pip_bin: str) -> None:
     )
 
 
-@patch("app.lib.extraction.get_session", get_session)
-def test_remove(session: Session, pip_bin: str) -> None:
+def test_remove(pip_bin: str) -> None:
     with patch("app.lib.package.pip_bin", pip_bin):
         add_packages()
 
@@ -60,12 +55,10 @@ def test_remove(session: Session, pip_bin: str) -> None:
     )
     lib.remove(name="ext-1")
 
-    extraction = models.Extraction.one_by_name(session=session, name="ext-1")  # type: ignore
+    extraction = models.Extraction.one_by_name(name="ext-1")  # type: ignore
     assert extraction is None, "Extraction %s is not removed" % "ext-1"
 
 
-@patch("app.lib.extraction.get_session", get_session)
-@patch("app.lib.package.get_session", get_session)
 def test_run(venv_bin: str, pip_bin: str) -> None:
     tap = "tap-csv"
     target = "target-csv"

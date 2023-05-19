@@ -9,6 +9,8 @@ test = [
 dev = [
     "tox-pdm>=0.6.1",
     "flake8>=6.0.0",
+    "pylint-flask-sqlalchemy>=0.2.0",
+    "pylint-flask>=0.6",
 ]
 [project]
 name = "app"
@@ -30,6 +32,11 @@ dependencies = [
     "colorama>=0.4.6",
     "Flask>=2.3.2",
     "jsonschema==4.18.0a7",
+    "flasgger>=0.9.5",
+    "Flask-Pydantic>=0.11.0",
+    "Flask-SQLAlchemy>=3.0.3",
+    "ptpython>=3.0.23",
+    "sqlalchemy-stubs>=0.4",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

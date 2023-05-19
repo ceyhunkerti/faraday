@@ -1,15 +1,19 @@
 from typing import Generator
 import pytest
-import app.settings as settings
+from app.settings import settings
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from app import models
+from app.models import db
 from tests.utils import get_session
 from sqlalchemy import create_engine
 from tempfile import TemporaryDirectory
 from logging import getLogger
 import subprocess
 import os
+from app import create_app
+from tests.base import get_settings
+from flask import Flask
+
 
 logger = getLogger(__name__)
 
@@ -36,7 +40,7 @@ def venv_bin(venv: str) -> Generator:
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_db() -> Generator:
-    url = settings.db.URL
+    url = settings.SQLALCHEMY_DATABASE_URI
 
     engine = create_engine(url)
     conn = engine.connect()
@@ -56,8 +60,13 @@ def setup_db() -> Generator:
     conn.execute(text("grant all privileges on database test to app"))
     conn.close()
 
-    engine = create_engine(url.rsplit("/app", 1)[0] + "/test")
-    models.Base.metadata.create_all(engine)
+    test_settings = get_settings()
+    app = create_app()
+    app.config["TESTING"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = test_settings.SQLALCHEMY_DATABASE_URI
+    app_ctx = app.app_context()
+    app_ctx.push()
+    db.create_all()
 
     yield
 
@@ -73,7 +82,21 @@ def setup_db() -> Generator:
         conn.close()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=False)
+def app() -> Flask:
+    from flask import current_app
+
+    with current_app.app_context():
+        yield current_app
+
+
+@pytest.fixture(autouse=False)
+def client(app: Flask) -> Generator:
+    with app.test_client() as client:
+        yield client
+
+
+@pytest.fixture(autouse=False)
 def session() -> Generator:
     with get_session() as session:
         yield session

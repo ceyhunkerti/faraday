@@ -1,5 +1,5 @@
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase
+from flask_sqlalchemy import SQLAlchemy
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -9,13 +9,19 @@ convention = {
     "pk": "pk_%(table_name)s",
 }
 
+db = SQLAlchemy()
 
-class Base(DeclarativeBase):
+
+class Base(db.Model):  # type: ignore
     __abstract__ = True
     metadata = MetaData(naming_convention=convention)
 
     def __repr__(self) -> str:
         columns = ", ".join(
-            [f"{k}={repr(v)}" for k, v in self.__dict__.items() if not k.startswith("_")]
+            [
+                f"{k}={repr(v)}"
+                for k, v in self.__dict__.items()
+                if not k.startswith("_")
+            ]
         )
         return f"<{self.__class__.__name__}({columns})>"

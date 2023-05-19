@@ -1,33 +1,31 @@
 from __future__ import annotations
-from typing import Iterator, Optional
+from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
-from sqlalchemy import select, JSON
+from sqlalchemy import JSON
 
 
-from .base import Base
+from .base import db, Base
 
 
 class Package(Base):
     __tablename__ = "packages"
 
-    id: Mapped[int] = mapped_column(
-        "id", autoincrement=True, nullable=False, unique=True, primary_key=True
+    id = db.Column(
+        db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True
     )
-    name: Mapped[str] = mapped_column(nullable=False, unique=True)
-    title: Mapped[str] = mapped_column("title", String(length=128), nullable=True)
-    config: Mapped[JSON] = mapped_column("config", JSON())
-    url: Mapped[str] = mapped_column("url", String(length=512), nullable=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    title = db.Column(db.String(length=128), nullable=True)
+    config = db.Column(JSON, nullable=True)
+    url = db.Column(db.String(length=512), nullable=True)
 
-    as_source = relationship(
+    as_source = db.relationship(
         "Extraction",
         foreign_keys="[Extraction.source_package_id]",
         back_populates="source_package",
         cascade="delete, delete-orphan",
     )
-    as_target = relationship(
+    as_target = db.relationship(
         "Extraction",
         foreign_keys="[Extraction.target_package_id]",
         back_populates="target_package",
@@ -35,38 +33,35 @@ class Package(Base):
     )
 
     @classmethod
-    def one(cls, session: Session, id: int) -> Optional["Package"]:
-        stmt = select(cls).filter_by(id=id)
-        return session.scalar(stmt)
+    def one(cls, id: int) -> Optional["Package"]:
+        return cls.query.one_or_none(id)
 
     @classmethod
-    def one_by_name(cls, session: Session, name: str) -> Optional["Package"]:
-        stmt = select(cls).filter_by(name=name)
-        return session.scalar(stmt)
+    def one_by_name(cls, name: str) -> Optional["Package"]:
+        return cls.query.filter_by(name=name).one_or_none()
 
     @classmethod
-    def all(cls, session: Session, name: str) -> Iterator["Package"]:
-        stmt = select(cls)
-        for row in session.scalars(stmt.order_by(cls.name)):
-            yield row
+    def all(cls, name: str) -> list["Package"]:
+        return cls.query.all()
 
     @classmethod
     def create(
         cls,
-        session: Session,
         name: str,
         title: Optional[str] = None,
         config: Optional[dict] = None,
         url: Optional[str] = None,
     ) -> "Package":
         package = cls(name=name, title=title, config=config, url=url)
-        session.add(package)
-        session.flush()
+        db.session.add(package)
+        db.session.flush()
         return package
 
-    def delete(self, session: Session) -> "Package":
-        session.delete(self)
-        session.flush()
+    def delete(
+        self,
+    ) -> "Package":
+        db.session.delete(self)
+        db.session.flush()
         return self
 
 
@@ -74,6 +69,7 @@ class PackageSchema(BaseModel):
     id: int
     name: str
     title: Optional[str]
+    url: Optional[str]
     config: Optional[dict]
 
     class Config:

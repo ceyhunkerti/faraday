@@ -10,3 +10,8 @@ class PackageNotFoundError(ApplicationError):
 class ExtractionNotFoundError(ApplicationError):
     def __init__(self, name):
         super().__init__("%s not found" % name)
+
+
+class StateUpdateError(ApplicationError):
+    def __init__(self, name):
+        super().__init__("failed to update extraction %s state" % name)

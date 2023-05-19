@@ -1,6 +1,6 @@
 import logging
 import sys
-from app import settings
+from app.settings import settings
 from colorama import init, Fore, Back
 
 
@@ -30,10 +30,10 @@ class ColorFormatter(logging.Formatter):
 
 class ColorLogger(logging.Logger):
     def __init__(self, name):
-        logging.Logger.__init__(self, name, settings.log.LEVEL)
-        color_formatter = ColorFormatter(settings.log.FORMAT)
+        logging.Logger.__init__(self, name, settings.LOG_LEVEL)
+        color_formatter = ColorFormatter(settings.LOG_FORMAT)
         console = logging.StreamHandler(
-            sys.stdout if settings.log.STDOUT else sys.stderr
+            sys.stdout if settings.LOG_STDOUT else sys.stderr
         )
         console.setFormatter(color_formatter)
         self.addHandler(console)

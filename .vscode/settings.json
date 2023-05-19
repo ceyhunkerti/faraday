@@ -16,7 +16,6 @@
         ".dist": true,
         "**/.pytest_cache": true,
         "site": true,
-        ".angular": true,
         ".ruff_cache": true,
         ".coverage": true,
         "node_modules": true
@@ -27,17 +26,26 @@
         "source.fixAll": true,
         "source.fixAll.eslint": true
     },
-    "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.linting.banditEnabled": false,
-    "python.linting.flake8Enabled": false,
+    "python.defaultInterpreterPath": "${workspaceFolder}/be/.venv/bin/python",
     "python.linting.flake8Args": [
         "--max-line-length=120"
     ],
     "python.linting.pylintEnabled": true,
     "python.linting.pylintArgs": [
-        "--load-plugins pylint_pydantic",
+        "--load-plugins",
+        "pylint_pydantic",
+        "pylint_flask_sqlalchemy",
+        "pylint_flask",
         "--rcfile=pylintrc"
     ],
+    "python.linting.mypyArgs": [
+        "--follow-imports=silent",
+        "--ignore-missing-imports",
+        "--show-column-numbers",
+        "--no-pretty",
+        "--config-file=${workspaceFolder}/be/mypy.init"
+    ],
+    "python.linting.lintOnSave": true,
     "python.linting.enabled": true,
     "python.testing.pytestEnabled": true,
     "python.envFile": "${workspaceFolder}/be/.env",
@@ -55,9 +63,7 @@
             "source.fixAll": true
         }
     },
-    "eslint.alwaysShowStatus": true,
     "eslint.validate": [
-        "vue",
         "javascript",
         "javascriptreact",
         "html"
@@ -69,27 +75,16 @@
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "python.linting.lintOnSave": true,
-    "python.linting.mypyEnabled": true,
     "python.testing.cwd": "${workspaceFolder}/be/tests",
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${env:PYTHONPATH}:${workspaceFolder}/be",
     },
-    "mypy.runUsingActiveInterpreter": true,
-    "mypy.targets": [
-        "be"
-    ],
-    "mypy.configFile": "",
-    "mypy.debugLogging": false,
-    "ruff.args": [],
-    "ruff.importStrategy": "fromEnvironment",
-    "pylint.importStrategy": "fromEnvironment",
     "black-formatter.importStrategy": "fromEnvironment",
-    "ruff.fixAll": true,
     "[toml]": {
         "editor.defaultFormatter": "be5invis.toml"
     },
     "cSpell.words": [
+        "appcontext",
         "ASGI",
         "asyncpg",
         "autoflush",
@@ -109,6 +104,7 @@
         "msgspec",
         "pgproto",
         "poolclass",
+        "ptpython",
         "pydantic",
         "pytz",
         "selectinload",
@@ -127,5 +123,5 @@
     },
     "[ignore]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
-    }
+    },
 }
