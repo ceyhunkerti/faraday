@@ -37,6 +37,7 @@ dependencies = [
     "Flask-SQLAlchemy>=3.0.3",
     "ptpython>=3.0.23",
     "sqlalchemy-stubs>=0.4",
+    "pydash>=7.0.3",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

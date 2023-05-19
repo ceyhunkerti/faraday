@@ -1,7 +1,5 @@
 from __future__ import annotations
 from typing import Optional
-
-from pydantic import BaseModel
 from sqlalchemy import JSON
 
 
@@ -41,7 +39,7 @@ class Package(Base):
         return cls.query.filter_by(name=name).one_or_none()
 
     @classmethod
-    def all(cls, name: str) -> list["Package"]:
+    def all(cls) -> list["Package"]:
         return cls.query.all()
 
     @classmethod
@@ -63,14 +61,3 @@ class Package(Base):
         db.session.delete(self)
         db.session.flush()
         return self
-
-
-class PackageSchema(BaseModel):
-    id: int
-    name: str
-    title: Optional[str]
-    url: Optional[str]
-    config: Optional[dict]
-
-    class Config:
-        orm_mode = True

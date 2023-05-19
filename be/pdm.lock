@@ -366,6 +366,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pydash"
+version = "7.0.3"
+requires_python = ">=3.7"
+summary = "The kitchen sink of Python utility libraries for doing \"stuff\" in a functional way. Based on the Lo-Dash Javascript library."
+dependencies = [
+    "typing-extensions>=3.10",
+]
+
+[[package]]
 name = "pyflakes"
 version = "3.0.1"
 requires_python = ">=3.6"
@@ -622,7 +631,7 @@ summary = "Module for decorators, wrappers and monkey patching."
 lock_version = "4.2"
 cross_platform = true
 groups = ["default", "dev", "test"]
-content_hash = "sha256:9013a45907e91edc2550bdbd26abfc5387c8fec4a310f05f15e3050e62a484c7"
+content_hash = "sha256:5b1e3ffd6f73c7a3bdad29239b11c8081bdcac22bee739116be652cfa6bb68e4"
 
 [metadata.files]
 "appdirs 1.4.4" = [
@@ -1149,6 +1158,10 @@ content_hash = "sha256:9013a45907e91edc2550bdbd26abfc5387c8fec4a310f05f15e3050e6
     {url = "https://files.pythonhosted.org/packages/f6/2d/0fc591686bc119d844f26268f503a7a504fbc9dd6a02e14aa42738c21fed/pydantic-1.10.7-cp39-cp39-win_amd64.whl", hash = "sha256:d71e69699498b020ea198468e2480a2f1e7433e32a3a99760058c6520e2bea7e"},
     {url = "https://files.pythonhosted.org/packages/fa/c2/3df79cd00e65678fce12e59e8c95378a992a93d7b9f9510d4f1f65df1936/pydantic-1.10.7-cp311-cp311-win_amd64.whl", hash = "sha256:b4a849d10f211389502059c33332e91327bc154acc1845f375a99eca3afa802d"},
     {url = "https://files.pythonhosted.org/packages/fd/66/3da2e7c0306251435bd61ae9da52db8a00672fdf2b2db1e3efe1692f41dd/pydantic-1.10.7-cp37-cp37m-musllinux_1_1_i686.whl", hash = "sha256:950ce33857841f9a337ce07ddf46bc84e1c4946d2a3bba18f8280297157a3fd1"},
+]
+"pydash 7.0.3" = [
+    {url = "https://files.pythonhosted.org/packages/39/06/c5b3f7443d74c37b85bf0a13b76eff9a69a0b007a3f15373713bc31fcd9e/pydash-7.0.3-py3-none-any.whl", hash = "sha256:712074ca510878d7adbe3a9dfa5dbe5188fdc6c7291914e0a131e9fda4dc24b7"},
+    {url = "https://files.pythonhosted.org/packages/68/41/cfac2c25b610d05511714c3702d415e1687f7c2c2a758371963e1d65f69b/pydash-7.0.3.tar.gz", hash = "sha256:2099b1f600c7ccbadadb1a57814cfa9409bffa01c4ab20534dc12218483f4d41"},
 ]
 "pyflakes 3.0.1" = [
     {url = "https://files.pythonhosted.org/packages/af/4c/b1c7008aa7788b3e26c06c60aa18da7d3aa1f00e344aa3f18ac92768854b/pyflakes-3.0.1-py2.py3-none-any.whl", hash = "sha256:ec55bf7fe21fff7f1ad2f7da62363d749e2a470500eab1b555334b67aa1ef8cf"},
