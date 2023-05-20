@@ -11,7 +11,7 @@ from logging import getLogger
 import subprocess
 import os
 from app import create_app
-from tests.base import get_settings
+from tests.base import get_test_settings
 from flask import Flask
 
 
@@ -38,7 +38,7 @@ def venv_bin(venv: str) -> Generator:
     yield bin
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_db() -> Generator:
     url = settings.SQLALCHEMY_DATABASE_URI
 
@@ -49,7 +49,7 @@ def setup_db() -> Generator:
         conn.execute(text("commit"))
         conn.execute(text("drop database test with (force)"))
     except SQLAlchemyError as e:
-        logger.info(e)
+        logger.debug(e, exc_info=True)
     finally:
         conn.execute(text("commit"))
         conn.close()
@@ -60,23 +60,26 @@ def setup_db() -> Generator:
     conn.execute(text("grant all privileges on database test to app"))
     conn.close()
 
-    test_settings = get_settings()
+    test_settings = get_test_settings()
     app = create_app()
     app.config["TESTING"] = True
     app.config["SQLALCHEMY_DATABASE_URI"] = test_settings.SQLALCHEMY_DATABASE_URI
     app_ctx = app.app_context()
     app_ctx.push()
+    db.session.close()
+    db.drop_all()
     db.create_all()
 
     yield
 
+    db.session.remove()
     engine = create_engine(url)
     conn = engine.connect()
     try:
         conn.execute(text("commit"))
         conn.execute(text("drop database test with (force)"))
     except SQLAlchemyError as e:
-        logger.error(e)
+        logger.debug(e, exc_info=True)
     finally:
         conn.execute(text("commit"))
         conn.close()

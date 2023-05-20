@@ -22,7 +22,9 @@ class Settings(BaseSettings):
 
     LOG_STDOUT: bool = False
     LOG_LEVEL: str = "INFO"
-    LOG_FORMAT = "[%(asctime)s][PID:%(process)d][%(levelname)s][%(name)s] %(message)s"
+    LOG_FORMAT = (
+        "[%(asctime)s][%(filename)s:%(lineno)s][%(levelname)s][%(name)s] %(message)s"
+    )
 
 
 @lru_cache

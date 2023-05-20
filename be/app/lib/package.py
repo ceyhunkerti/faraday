@@ -53,12 +53,14 @@ def add(
     title: Optional[str] = None,
     config: Optional[dict] = None,
     url: Optional[str] = None,
+    skip_install: Optional[bool] = False,
 ) -> Optional[models.Package]:
     if models.Package.one_by_name(name):
         logger.warning(f"{name} already exists!")
         return None
     else:
-        install(url if url else name)
+        if not skip_install:
+            install(url if url else name)
         logger.debug("registering package ...")
         package = models.Package.create(
             name=name,
@@ -70,12 +72,15 @@ def add(
         return package
 
 
-def remove(name: str) -> Optional[models.Package]:
+def remove(
+    name: str, skip_uninstall: Optional[bool] = False
+) -> Optional[models.Package]:
     if not (package := models.Package.one_by_name(name)):
         logger.warning(f"{name} not installed")
         return None
     else:
-        uninstall(name)
+        if not skip_uninstall:
+            uninstall(name)
         logger.debug("un-registering package ...")
         package.delete()
         return package

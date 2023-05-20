@@ -104,6 +104,7 @@
         "msgpack",
         "msgspec",
         "pgproto",
+        "plib",
         "poolclass",
         "ptpython",
         "pydantic",

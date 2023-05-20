@@ -1,8 +1,10 @@
 from app.settings import settings, Settings
+import copy
 
 
-def get_settings() -> Settings:
-    settings.SQLALCHEMY_DATABASE_URI = (
+def get_test_settings() -> Settings:
+    _settings = copy.deepcopy(settings)
+    _settings.SQLALCHEMY_DATABASE_URI = (
         settings.SQLALCHEMY_DATABASE_URI.rsplit("/app", 1)[0] + "/test"
     )
-    return settings  # type: ignore
+    return _settings  # type: ignore
