@@ -1,13 +1,11 @@
-from typing import List
 from flask import Blueprint
 from flask_pydantic import validate
 from app.api.schema import PageQueryParams
 from app.models import Package
 from app.api.schema import PackageSchema
-from pydantic import parse_obj_as
-from flask import jsonify
-
+from flask_sqlalchemy.pagination import Pagination
 from logging import getLogger
+from .base import page_to_json
 
 logger = getLogger(__name__)
 
@@ -18,5 +16,5 @@ bp = Blueprint("packages", __name__, url_prefix="/packages")
 @bp.route("", methods=["GET"])
 @validate()
 def index(query: PageQueryParams):
-    result = parse_obj_as(List[PackageSchema], Package.all())
-    return jsonify([r.dict() for r in result]), 200
+    page: Pagination = Package.query.paginate(**query.dict())
+    return page_to_json(PackageSchema, page), 200

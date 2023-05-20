@@ -6,11 +6,12 @@ T = TypeVar("T")
 
 class PageQueryParams(BaseModel):
     page: Optional[int] = 1
-    page_size: Optional[int] = 20
+    per_page: Optional[int] = 20
 
 
 class Pagination(BaseModel, Generic[T]):
+    query: str
     total: int
     page: int
-    page_size: int
+    per_page: int
     items: List[T]
