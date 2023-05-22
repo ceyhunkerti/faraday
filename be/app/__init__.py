@@ -1,4 +1,4 @@
-from app.main import create_app
+from app.app import create_app
 from app.log import setup_logging
 
 

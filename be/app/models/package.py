@@ -1,9 +1,12 @@
 from __future__ import annotations
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from sqlalchemy import JSON
-
+from sqlalchemy import Enum
 
 from .base import db, Base
+
+if TYPE_CHECKING:
+    from .extraction import Extraction
 
 
 class Package(Base):
@@ -17,22 +20,36 @@ class Package(Base):
     config = db.Column(JSON, nullable=True)
     url = db.Column(db.String(length=512), nullable=True)
 
-    as_source = db.relationship(
+    package_type = db.Column(Enum("tap", "target", name="package_type"), nullable=False)
+
+    __as_source = db.relationship(
         "Extraction",
         foreign_keys="[Extraction.source_package_id]",
         back_populates="source_package",
         cascade="delete, delete-orphan",
     )
-    as_target = db.relationship(
+    __as_target = db.relationship(
         "Extraction",
         foreign_keys="[Extraction.target_package_id]",
         back_populates="target_package",
         cascade="delete, delete-orphan",
     )
 
+    @property
+    def is_tap(self) -> bool:
+        return self.package_type == "tap"
+
+    @property
+    def is_target(self) -> bool:
+        return self.package_type == "target"
+
+    @property
+    def used_in(self) -> list["Extraction"]:
+        return self.__as_source if self.is_tap else self.__as_target
+
     @classmethod
     def one(cls, id: int) -> Optional["Package"]:
-        return cls.query.one_or_none(id)
+        return cls.query.filter_by(id=id).one_or_none()
 
     @classmethod
     def one_by_name(cls, name: str) -> Optional["Package"]:

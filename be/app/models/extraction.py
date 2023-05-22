@@ -17,14 +17,14 @@ class Extraction(Base):
     source_package_id = db.Column(db.Integer, ForeignKey("packages.id"), nullable=False)
     source_package = db.relationship(
         "Package",
-        back_populates="as_source",
+        back_populates="__as_source",
         foreign_keys=[source_package_id],
     )
     source_config = db.Column(JSON, nullable=True)
 
     target_package_id = db.Column(db.Integer, ForeignKey("packages.id"), nullable=False)
     target_package = db.relationship(
-        "Package", back_populates="as_target", foreign_keys=[target_package_id]
+        "Package", back_populates="__as_target", foreign_keys=[target_package_id]
     )
     target_config = db.Column(JSON, nullable=True)
 

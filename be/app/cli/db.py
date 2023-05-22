@@ -1,23 +1,14 @@
-import click
 from app.lib.db import init as init_db, drop as drop_db
+from flask.cli import AppGroup
 
-from app.db import engine
-
-
-@click.group()
-def db():
-    "database commands"
+manager = AppGroup(help="Repository management commands")
 
 
-@db.command()
+@manager.command()
 def init() -> None:
-    with engine.connect() as conn:
-        init_db(conn)
-        conn.commit()
+    init_db()
 
 
-@db.command()
+@manager.command()
 def drop() -> None:
-    with engine.connect() as conn:
-        drop_db(conn)
-        conn.commit()
+    drop_db()

@@ -1,15 +1,13 @@
 from typing import Optional
-import click
 from app.lib import extraction as lib
 from app import util
+from flask.cli import AppGroup
+import click
+
+manager = AppGroup(help="Extraction management commands")
 
 
-@click.group()
-def extraction():
-    "extraction commands"
-
-
-@extraction.command()
+@manager.command()
 @click.argument("name")
 @click.argument("source")
 @click.option("-s", "--source-config", required=False)
@@ -31,7 +29,7 @@ def add(
     )
 
 
-@extraction.command()
+@manager.command()
 @click.argument("name")
 def remove(name: str) -> None:
     lib.remove(name=name)

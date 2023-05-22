@@ -2,15 +2,12 @@ import click
 from flask.cli import FlaskGroup, run_command, with_appcontext
 from flask import current_app
 
-from .db import db
-from .package import package
-from .extraction import extraction
+from . import db, package, extraction
 from app import create_app
 
 
-def create(group):
+def create():
     app = current_app or create_app()
-    group.app = app
 
     @app.shell_context_processor
     def shell_context():
@@ -23,22 +20,17 @@ def create(group):
 
 
 @click.group(cls=FlaskGroup, create_app=create)
-def app():
-    """Management script for the App"""
+def manager():
+    """Management script for App"""
 
 
-@app.command()
-def start() -> None:
-    print("hello")
+manager.add_command(db.manager, "db")
+manager.add_command(package.manager, "package")
+manager.add_command(extraction.manager, "extraction")
+manager.add_command(run_command, "runserver")
 
 
-app.add_command(db)
-app.add_command(package)
-app.add_command(extraction)
-app.add_command(run_command, "runserver")
-
-
-@app.command("shell")
+@manager.command("shell")
 @with_appcontext
 def shell():
     import sys  # noqa

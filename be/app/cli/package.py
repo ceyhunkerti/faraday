@@ -2,14 +2,13 @@ from typing import Optional
 import click
 from app.lib import package as lib
 from app import util
+from flask.cli import AppGroup
+from app.registry import PACKAGES
+
+manager = AppGroup(help="Package management commands")
 
 
-@click.group()
-def package():
-    "package commands"
-
-
-@package.command()
+@manager.command()
 @click.argument("name", required=True)
 @click.argument("title", required=False, type=str)
 @click.option("--default-config", required=False, type=str)
@@ -28,7 +27,13 @@ def add(
     )
 
 
-@package.command()
+@manager.command()
 @click.argument("name", required=True)
 def remove(name: str) -> None:
     lib.remove(name)
+
+
+@manager.command(name="list")
+def list_packages():
+    for p in PACKAGES:
+        click.echo("\n" + "- " + str(p))

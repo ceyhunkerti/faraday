@@ -2,6 +2,13 @@ from flask.testing import FlaskClient
 from tests import data
 
 
+def test_show(client: FlaskClient):
+    packages = data.gen_package(2)
+    response = client.get("/packages/" + str(packages[0].id))
+    assert response.status_code == 200
+    assert response.json["name"] == packages[0].name  # type: ignore
+
+
 def test_index(client: FlaskClient) -> None:
     packages = data.gen_package(10)
 

@@ -41,3 +41,7 @@ class ColorLogger(logging.Logger):
 
 def setup_logging():
     logging.setLoggerClass(ColorLogger)
+
+    if settings.LOG_LEVEL != "DEBUG":
+        for name in ["sqlalchemy.orm.mapper.Mapper"]:
+            logging.getLogger(name).setLevel("ERROR")
